@@ -284,6 +284,46 @@
         <p class="piti-game-status" id="bubble-status" role="status">Press start to play.</p>
       </div>
     </section>
+    <section class="game-section" aria-labelledby="yaiza-hunt-title" lang="en">
+      <div class="game-heading">
+        <h2 id="yaiza-hunt-title">YAIZA'S COFFEE HUNT</h2>
+        <span>04 / FEED ME</span>
+      </div>
+      <p style="margin: 8px 0 16px; font-size: 12px; color: #d9463b; font-weight: bold;">Yaiza está enfadada porque no se ha bebido su café. ¡Ayúdala a encontrar todos los que pueda!</p>
+      <div class="piti-game">
+        <div class="piti-game-titlebar" aria-hidden="true">
+          <span>YAIZA_HUNT.EXE</span>
+          <span class="piti-game-window-buttons"><span>−</span><span>□</span><span>×</span></span>
+        </div>
+        <canvas id="yaiza-hunt-canvas" width="800" height="300" tabindex="0" aria-label="Yaiza's Coffee Hunt. Snake game where Yaiza collects coffee."></canvas>
+        <div class="piti-game-controls">
+          <button id="yaiza-hunt-button" type="button">START</button>
+          <span>Arrow keys or WASD to move. Help Yaiza find coffee and grow stronger!</span>
+          <span class="piti-game-score">COFFEE: <strong id="yaiza-hunt-score">0</strong></span>
+        </div>
+        <p class="piti-game-status" id="yaiza-hunt-status" role="status">Press start to play.</p>
+      </div>
+    </section>
+    <section class="game-section" aria-labelledby="isa-moto-title" lang="en">
+      <div class="game-heading">
+        <h2 id="isa-moto-title">ISA'S MOTORCYCLE BALANCE</h2>
+        <span>05 / STAY BALANCED</span>
+      </div>
+      <p style="margin: 8px 0 16px; font-size: 12px; color: #568389; font-weight: bold;">¡Isa en moto! Mantén el equilibrio presionando y soltando. ¡No te caigas!</p>
+      <div class="piti-game">
+        <div class="piti-game-titlebar" aria-hidden="true">
+          <span>ISA_MOTO.EXE</span>
+          <span class="piti-game-window-buttons"><span>−</span><span>□</span><span>×</span></span>
+        </div>
+        <canvas id="isa-moto-canvas" width="800" height="300" tabindex="0" aria-label="Isa's Motorcycle Balance. Keep Isa balanced on the motorcycle."></canvas>
+        <div class="piti-game-controls">
+          <button id="isa-moto-button" type="button">START</button>
+          <span>Isa's Gravity Challenge - How high can she go?</span>
+          <span class="piti-game-score">CLICKS: <strong id="isa-moto-score">0</strong></span>
+        </div>
+        <p class="piti-game-status" id="isa-moto-status" role="status">Press start to play.</p>
+      </div>
+    </section>
   </main>
   <script>
 {
@@ -919,6 +959,22 @@
     }
 
     words.forEach(drawWord);
+
+    if (clickState === "over") {
+      clickContext.fillStyle = "rgba(0, 0, 0, 0.5)";
+      clickContext.fillRect(0, 0, clickGame.width, clickGame.height);
+      
+      clickContext.font = "bold 32px monospace";
+      clickContext.fillStyle = "#d9463b";
+      clickContext.textAlign = "center";
+      clickContext.fillText("SCORE: " + clicksCount, clickGame.width / 2, clickGame.height / 2 - 20);
+      
+      clickContext.font = "bold 28px monospace";
+      clickContext.fillStyle = "#ffffff";
+      clickContext.fillText("LO HAS HECHO FATAL TIA", clickGame.width / 2, clickGame.height / 2 + 30);
+      
+      clickContext.textAlign = "start";
+    }
   }
 
   function endClickGame() {
@@ -1011,10 +1067,21 @@
   const bubbleStatus = bubbleGame.parentElement.parentElement.querySelector("#bubble-status");
 
   const bubbles = [];
+  const phrases = [
+    "lo estas haciendo genial tia",
+    "eres perfecta xoxo",
+    "ni te rayes",
+    "respira profundo",
+    "mereces descansar",
+    "eres suficiente",
+    "todo va a estar bien"
+  ];
+  const floatingPhrases = [];
   let bubbleState = "ready";
   let bubblesPopped = 0;
   let bubbleAnimationId = null;
   let nextBubbleSpawn = 0;
+  let nextPhraseSpawn = 0;
 
   function spawnBubble() {
     const radius = 15 + Math.random() * 20;
@@ -1025,6 +1092,20 @@
       vx: (Math.random() - 0.5) * 1.5,
       vy: -(0.2 + Math.random() * 0.5),
       opacity: 1
+    });
+  }
+
+  function spawnPhrase() {
+    const phrase = phrases[Math.floor(Math.random() * phrases.length)];
+    floatingPhrases.push({
+      text: phrase,
+      x: Math.random() * (bubbleGame.width - 100) + 50,
+      y: Math.random() * (bubbleGame.height - 100) + 50,
+      vx: (Math.random() - 0.5) * 0.5,
+      vy: (Math.random() - 0.5) * 0.5,
+      opacity: 0.6,
+      lifetime: 3000 + Math.random() * 2000,
+      age: 0
     });
   }
 
@@ -1066,6 +1147,31 @@
       bubbleContext.arc(bubble.x, bubble.y, bubble.radius, 0, Math.PI * 2);
       bubbleContext.fill();
     }
+
+    // Draw floating phrases
+    for (let i = floatingPhrases.length - 1; i >= 0; i--) {
+      const phrase = floatingPhrases[i];
+      phrase.x += phrase.vx;
+      phrase.y += phrase.vy;
+      phrase.age += 16;
+
+      if (phrase.age >= phrase.lifetime) {
+        floatingPhrases.splice(i, 1);
+        continue;
+      }
+
+      const fadeStart = phrase.lifetime * 0.7;
+      let opacity = phrase.opacity;
+      if (phrase.age > fadeStart) {
+        opacity *= (1 - (phrase.age - fadeStart) / (phrase.lifetime - fadeStart));
+      }
+
+      bubbleContext.fillStyle = `rgba(150, 150, 150, ${opacity})`;
+      bubbleContext.font = "italic 14px monospace";
+      bubbleContext.textAlign = "center";
+      bubbleContext.fillText(phrase.text, phrase.x, phrase.y);
+      bubbleContext.textAlign = "start";
+    }
   }
 
   function updateBubble() {
@@ -1074,6 +1180,12 @@
       if (nextBubbleSpawn <= 0) {
         spawnBubble();
         nextBubbleSpawn = 30 + Math.random() * 50;
+      }
+
+      nextPhraseSpawn--;
+      if (nextPhraseSpawn <= 0) {
+        spawnPhrase();
+        nextPhraseSpawn = 80 + Math.random() * 120;
       }
     }
     
@@ -1085,6 +1197,8 @@
     bubbleState = "playing";
     bubblesPopped = 0;
     bubbles.length = 0;
+    floatingPhrases.length = 0;
+    nextPhraseSpawn = 0;
     bubbleCountDisplay.textContent = "0";
     bubbleStatus.textContent = "Pop some bubbles. Breathe.";
     bubbleButton.textContent = "RESET";
@@ -1119,6 +1233,7 @@
     } else {
       bubbleState = "ready";
       bubbles.length = 0;
+      floatingPhrases.length = 0;
       bubblesPopped = 0;
       bubbleCountDisplay.textContent = "0";
       bubbleStatus.textContent = "Press start to play.";
@@ -1130,6 +1245,456 @@
   });
 
   updateBubble();
+}
+
+// YAIZA'S COFFEE HUNT (SNAKE GAME)
+{
+  const huntCanvas = document.querySelector("#yaiza-hunt-canvas");
+  const huntContext = huntCanvas.getContext("2d");
+  if (!huntContext) throw new Error("Unable to start Yaiza's Coffee Hunt.");
+
+  const huntButton = huntCanvas.parentElement.parentElement.querySelector("button");
+  const huntScoreDisplay = huntCanvas.parentElement.parentElement.querySelector("#yaiza-hunt-score");
+  const huntStatus = huntCanvas.parentElement.parentElement.querySelector("#yaiza-hunt-status");
+
+  const tileSize = 20;
+  const cols = Math.floor(huntCanvas.width / tileSize);
+  const rows = Math.floor(huntCanvas.height / tileSize);
+
+  let yaiza = [{x: 10, y: 10}];
+  let direction = {x: 1, y: 0};
+  let nextDirection = {x: 1, y: 0};
+  let coffee = {x: 15, y: 15};
+  let score = 0;
+  let gameRunning = false;
+  let gameOverFlag = false;
+  let lastMoveTime = 0;
+  let moveDelay = 150;
+  let huntAnimationId = null;
+
+  function generateCoffee() {
+    let newCoffee;
+    let valid = false;
+    while (!valid) {
+      newCoffee = {
+        x: Math.floor(Math.random() * cols),
+        y: Math.floor(Math.random() * rows)
+      };
+      valid = !yaiza.some(segment => segment.x === newCoffee.x && segment.y === newCoffee.y);
+    }
+    coffee = newCoffee;
+  }
+
+  function drawYaizaSegment(x, y, isHead = false) {
+    const px = x * tileSize;
+    const py = y * tileSize;
+
+    if (isHead) {
+      // Head: Cabeza marrón de Yaiza
+      huntContext.fillStyle = "#60412e";
+      huntContext.fillRect(px + 2, py + 2, tileSize - 4, tileSize - 4);
+      
+      // Eyes
+      huntContext.fillStyle = "#d7ad72";
+      huntContext.fillRect(px + 4, py + 6, 3, 3);
+      huntContext.fillRect(px + 13, py + 6, 3, 3);
+      
+      // Pupils
+      huntContext.fillStyle = "#171717";
+      huntContext.fillRect(px + 5, py + 7, 1, 1);
+      huntContext.fillRect(px + 14, py + 7, 1, 1);
+    } else {
+      // Body: Leopard pattern
+      // Base color dorado/marrón
+      huntContext.fillStyle = "#d4a574";
+      huntContext.fillRect(px + 2, py + 2, tileSize - 4, tileSize - 4);
+      
+      // Leopard spots (manchas negras/marrones)
+      huntContext.fillStyle = "#3d2817";
+      // Spot 1
+      huntContext.fillRect(px + 4, py + 4, 3, 2);
+      // Spot 2
+      huntContext.fillRect(px + 10, py + 5, 2, 3);
+      // Spot 3
+      huntContext.fillRect(px + 6, py + 10, 2, 2);
+      // Spot 4
+      huntContext.fillRect(px + 12, py + 11, 2, 2);
+      
+      // Border
+      huntContext.strokeStyle = "#a07a4e";
+      huntContext.lineWidth = 1;
+      huntContext.strokeRect(px + 2, py + 2, tileSize - 4, tileSize - 4);
+    }
+  }
+
+  function drawCoffee() {
+    const px = coffee.x * tileSize;
+    const py = coffee.y * tileSize;
+    
+    // Coffee cup
+    huntContext.fillStyle = "#d9463b";
+    huntContext.fillRect(px + 4, py + 6, 12, 10);
+    
+    // Handle
+    huntContext.strokeStyle = "#d9463b";
+    huntContext.lineWidth = 2;
+    huntContext.beginPath();
+    huntContext.arc(px + 15, py + 11, 3, -Math.PI / 2, Math.PI / 2);
+    huntContext.stroke();
+  }
+
+  function drawHuntGame() {
+    // Background
+    huntContext.fillStyle = "#f4eddf";
+    huntContext.fillRect(0, 0, huntCanvas.width, huntCanvas.height);
+
+    // Grid
+    huntContext.strokeStyle = "#e3dcd0";
+    huntContext.lineWidth = 1;
+    for (let x = 0; x <= cols; x++) {
+      huntContext.beginPath();
+      huntContext.moveTo(x * tileSize, 0);
+      huntContext.lineTo(x * tileSize, huntCanvas.height);
+      huntContext.stroke();
+    }
+    for (let y = 0; y <= rows; y++) {
+      huntContext.beginPath();
+      huntContext.moveTo(0, y * tileSize);
+      huntContext.lineTo(huntCanvas.width, y * tileSize);
+      huntContext.stroke();
+    }
+
+    // Draw coffee
+    drawCoffee();
+
+    // Draw Yaiza
+    yaiza.forEach((segment, index) => {
+      drawYaizaSegment(segment.x, segment.y, index === 0);
+    });
+
+    // Game over screen
+    if (gameOverFlag) {
+      huntContext.fillStyle = "rgba(244, 237, 223, 0.9)";
+      huntContext.fillRect(0, 0, huntCanvas.width, huntCanvas.height);
+      
+      huntContext.fillStyle = "#171717";
+      huntContext.font = "bold 24px monospace";
+      huntContext.textAlign = "center";
+      huntContext.fillText("GAME OVER", huntCanvas.width / 2, huntCanvas.height / 2 - 20);
+      
+      huntContext.fillStyle = "#d9463b";
+      huntContext.font = "bold 18px monospace";
+      
+      let coffeeMessage = `Yaiza managed to drink ${score} coffees`;
+      if (score > 100) {
+        coffeeMessage = `😱 YAIZA DRANK ${score} COFFEES!!! 😱`;
+      } else if (score > 50) {
+        coffeeMessage = `WOW! Yaiza drank ${score} coffees!`;
+      } else if (score > 30) {
+        coffeeMessage = `Yaiza managed to drink ${score} coffees`;
+      }
+      
+      huntContext.fillText(coffeeMessage, huntCanvas.width / 2, huntCanvas.height / 2 + 15);
+      
+      huntContext.textAlign = "start";
+    }
+  }
+
+  function updateHuntGame(timestamp) {
+    if (!huntStatus) return;
+
+    if (gameRunning && timestamp - lastMoveTime > moveDelay) {
+      direction = nextDirection;
+
+      const head = yaiza[0];
+      const newHead = {
+        x: head.x + direction.x,
+        y: head.y + direction.y
+      };
+
+      // Collision detection
+      if (newHead.x < 0 || newHead.x >= cols || newHead.y < 0 || newHead.y >= rows ||
+          yaiza.some(segment => segment.x === newHead.x && segment.y === newHead.y)) {
+        gameRunning = false;
+        gameOverFlag = true;
+        huntStatus.textContent = `Game Over! Yaiza grew to ${score} segments. Press START to retry.`;
+        huntButton.textContent = "RETRY";
+      } else {
+        yaiza.unshift(newHead);
+
+        // Check coffee collision
+        if (newHead.x === coffee.x && newHead.y === coffee.y) {
+          score++;
+          huntScoreDisplay.textContent = String(score);
+          generateCoffee();
+          moveDelay = Math.max(80, moveDelay - 2);
+        } else {
+          yaiza.pop();
+        }
+      }
+      lastMoveTime = timestamp;
+    }
+
+    drawHuntGame();
+    huntAnimationId = requestAnimationFrame(updateHuntGame);
+  }
+
+  function startHunt() {
+    yaiza = [{x: 10, y: 10}];
+    direction = {x: 1, y: 0};
+    nextDirection = {x: 1, y: 0};
+    score = 0;
+    moveDelay = 150;
+    gameRunning = true;
+    gameOverFlag = false;
+    huntScoreDisplay.textContent = "0";
+    huntStatus.textContent = "Help Yaiza find coffee and grow!";
+    huntButton.textContent = "RESET";
+    generateCoffee();
+    lastMoveTime = performance.now();
+    updateHuntGame(performance.now());
+  }
+
+  document.addEventListener("keydown", (event) => {
+    if (!gameRunning) return;
+
+    const key = event.key.toLowerCase();
+
+    if (key === "arrowup" || key === "w") {
+      if (direction.y === 0) nextDirection = {x: 0, y: -1};
+      event.preventDefault();
+    } else if (key === "arrowdown" || key === "s") {
+      if (direction.y === 0) nextDirection = {x: 0, y: 1};
+      event.preventDefault();
+    } else if (key === "arrowleft" || key === "a") {
+      if (direction.x === 0) nextDirection = {x: -1, y: 0};
+      event.preventDefault();
+    } else if (key === "arrowright" || key === "d") {
+      if (direction.x === 0) nextDirection = {x: 1, y: 0};
+      event.preventDefault();
+    }
+  });
+
+  huntButton.addEventListener("click", () => {
+    if (!gameRunning && !gameOverFlag) {
+      startHunt();
+    } else {
+      gameRunning = false;
+      gameOverFlag = false;
+      yaiza = [];
+      score = 0;
+      huntScoreDisplay.textContent = "0";
+      huntStatus.textContent = "Press START to play.";
+      huntButton.textContent = "START";
+      cancelAnimationFrame(huntAnimationId);
+      huntContext.fillStyle = "#f4eddf";
+      huntContext.fillRect(0, 0, huntCanvas.width, huntCanvas.height);
+    }
+  });
+
+  // Initial draw
+  huntContext.fillStyle = "#f4eddf";
+  huntContext.fillRect(0, 0, huntCanvas.width, huntCanvas.height);
+  
+  huntContext.strokeStyle = "#e3dcd0";
+  huntContext.lineWidth = 1;
+  for (let x = 0; x <= cols; x++) {
+    huntContext.beginPath();
+    huntContext.moveTo(x * tileSize, 0);
+    huntContext.lineTo(x * tileSize, huntCanvas.height);
+    huntContext.stroke();
+  }
+  for (let y = 0; y <= rows; y++) {
+    huntContext.beginPath();
+    huntContext.moveTo(0, y * tileSize);
+    huntContext.lineTo(huntCanvas.width, y * tileSize);
+    huntContext.stroke();
+  }
+
+  generateCoffee();
+  drawCoffee();
+  drawYaizaSegment(yaiza[0].x, yaiza[0].y, true);
+
+  updateHuntGame(performance.now());
+}
+
+// ISA'S GRAVITY CHALLENGE
+{
+  const motoCanvas = document.querySelector("#isa-moto-canvas");
+  const motoContext = motoCanvas.getContext("2d");
+  if (!motoContext) throw new Error("Unable to start Isa's Gravity Challenge.");
+
+  const motoButton = motoCanvas.parentElement.parentElement.querySelector("button");
+  const motoScoreDisplay = motoCanvas.parentElement.parentElement.querySelector("#isa-moto-score");
+  const motoStatus = motoCanvas.parentElement.parentElement.querySelector("#isa-moto-status");
+
+  const isa = {
+    x: motoCanvas.width / 2 - 10,
+    y: 50,
+    width: 20,
+    height: 15,
+    velocity: 0,
+    gravity: 0.6,
+    jumpForce: -12
+  };
+
+  let score = 0;
+  let gameRunning = false;
+  let gameOverFlag = false;
+  let motoAnimationId = null;
+
+  function drawIsaMoto() {
+    // Isa on motorcycle
+    motoContext.fillStyle = "#f4d99d";
+    motoContext.fillRect(isa.x, isa.y, 20, 15);
+
+    // Hair
+    motoContext.fillStyle = "#568389";
+    motoContext.fillRect(isa.x - 2, isa.y - 4, 24, 4);
+
+    // Eyes
+    motoContext.fillStyle = "#171717";
+    motoContext.fillRect(isa.x + 4, isa.y + 3, 2, 2);
+    motoContext.fillRect(isa.x + 12, isa.y + 3, 2, 2);
+
+    // Motorcycle
+    motoContext.fillStyle = "#171717";
+    motoContext.fillRect(isa.x - 5, isa.y + 15, 30, 12);
+
+    // Wheels
+    motoContext.fillStyle = "#333333";
+    motoContext.beginPath();
+    motoContext.arc(isa.x + 2, isa.y + 27, 3, 0, Math.PI * 2);
+    motoContext.fill();
+    motoContext.beginPath();
+    motoContext.arc(isa.x + 18, isa.y + 27, 3, 0, Math.PI * 2);
+    motoContext.fill();
+  }
+
+  function drawMoto() {
+    motoContext.fillStyle = "#f4eddf";
+    motoContext.fillRect(0, 0, motoCanvas.width, motoCanvas.height);
+
+    // Grid
+    motoContext.strokeStyle = "#e3dcd0";
+    motoContext.lineWidth = 1;
+    for (let x = 0; x <= motoCanvas.width; x += 40) {
+      motoContext.beginPath();
+      motoContext.moveTo(x, 0);
+      motoContext.lineTo(x, motoCanvas.height);
+      motoContext.stroke();
+    }
+    for (let y = 0; y <= motoCanvas.height; y += 40) {
+      motoContext.beginPath();
+      motoContext.moveTo(0, y);
+      motoContext.lineTo(motoCanvas.width, y);
+      motoContext.stroke();
+    }
+
+    // Draw Isa
+    drawIsaMoto();
+
+    // Draw score
+    motoContext.fillStyle = "#171717";
+    motoContext.font = "bold 16px monospace";
+    motoContext.fillText("CLICKS: " + score, 20, 30);
+
+    // Game over screen
+    if (gameOverFlag) {
+      motoContext.fillStyle = "rgba(244, 237, 223, 0.9)";
+      motoContext.fillRect(0, 0, motoCanvas.width, motoCanvas.height);
+
+      motoContext.fillStyle = "#171717";
+      motoContext.font = "bold 24px monospace";
+      motoContext.textAlign = "center";
+      motoContext.fillText("CRASH!", motoCanvas.width / 2, motoCanvas.height / 2 - 20);
+
+      motoContext.fillStyle = "#568389";
+      motoContext.font = "bold 18px monospace";
+      const distance = score * 10;
+      motoContext.fillText(`Isa managed to travel ${distance}m without falling`, motoCanvas.width / 2, motoCanvas.height / 2 + 15);
+
+      motoContext.textAlign = "start";
+    }
+  }
+
+  function updateMoto() {
+    if (gameRunning) {
+      // Apply gravity
+      isa.velocity += isa.gravity;
+      isa.y += isa.velocity;
+
+      // Check collision with bottom
+      if (isa.y + 27 >= motoCanvas.height) {
+        gameRunning = false;
+        gameOverFlag = true;
+        motoStatus.textContent = `¡Isa cayó! Hizo ${score} clicks. Presiona START para reintentar.`;
+        motoButton.textContent = "RETRY";
+      }
+
+      // Keep Isa within canvas bounds (top)
+      if (isa.y < 0) {
+        isa.y = 0;
+        isa.velocity = 0;
+      }
+    }
+
+    drawMoto();
+    motoAnimationId = requestAnimationFrame(updateMoto);
+  }
+
+  function jump() {
+    if (gameRunning) {
+      isa.velocity = isa.jumpForce;
+      score++;
+      motoScoreDisplay.textContent = String(score);
+    }
+  }
+
+  function startMoto() {
+    isa.x = motoCanvas.width / 2 - 10;
+    isa.y = 50;
+    isa.velocity = 0;
+    score = 0;
+    gameRunning = true;
+    gameOverFlag = false;
+    motoScoreDisplay.textContent = "0";
+    motoStatus.textContent = "Press SPACE or click to make Isa jump! How many jumps can you make?";
+    motoButton.textContent = "RESET";
+    updateMoto();
+  }
+
+  document.addEventListener("keydown", (event) => {
+    if (event.code === "Space") {
+      jump();
+      event.preventDefault();
+    }
+  });
+
+  motoCanvas.addEventListener("click", () => {
+    jump();
+  });
+
+  motoButton.addEventListener("click", () => {
+    if (!gameRunning && !gameOverFlag) {
+      startMoto();
+    } else {
+      gameRunning = false;
+      gameOverFlag = false;
+      score = 0;
+      isa.x = motoCanvas.width / 2 - 10;
+      isa.y = 50;
+      isa.velocity = 0;
+      motoScoreDisplay.textContent = "0";
+      motoStatus.textContent = "Presiona start para jugar.";
+      motoButton.textContent = "START";
+      cancelAnimationFrame(motoAnimationId);
+      motoContext.fillStyle = "#f4eddf";
+      motoContext.fillRect(0, 0, motoCanvas.width, motoCanvas.height);
+    }
+  });
+
+  updateMoto();
 }
   </script>
 </body>
