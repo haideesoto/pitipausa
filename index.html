@@ -246,9 +246,43 @@
         <p class="piti-game-status" role="status">Press start to play.</p>
       </div>
     </section>
-    <section class="coming-soon" lang="en" aria-labelledby="coming-soon-title">
-      <p>02 / ???</p>
-      <h2 id="coming-soon-title">MORE TO COME....</h2>
+    <section class="game-section" aria-labelledby="click-title" lang="en">
+      <div class="game-heading">
+        <h2 id="click-title">CLICK ESCAPE - BREAK FREE</h2>
+        <span>02 / PLAY NOW</span>
+      </div>
+      <div class="piti-game">
+        <div class="piti-game-titlebar" aria-hidden="true">
+          <span>CLICK_ESCAPE.EXE</span>
+          <span class="piti-game-window-buttons"><span>−</span><span>□</span><span>×</span></span>
+        </div>
+        <canvas id="click-canvas" width="800" height="300" tabindex="0" aria-label="Click Escape game. Click on thoughts to dispel them."></canvas>
+        <div class="piti-game-controls">
+          <button id="click-button" type="button">START</button>
+          <span>Click the thoughts to dispel them. 5 seconds! How many can you get?</span>
+          <span class="piti-game-score">CLICKS: <strong id="click-chains">0</strong></span>
+        </div>
+        <p class="piti-game-status" id="click-status" role="status">Press start to play.</p>
+      </div>
+    </section>
+    <section class="game-section" aria-labelledby="bubble-title" lang="en">
+      <div class="game-heading">
+        <h2 id="bubble-title">BUBBLE FLOAT - FIND YOUR ZEN</h2>
+        <span>03 / BREATHE</span>
+      </div>
+      <div class="piti-game">
+        <div class="piti-game-titlebar" aria-hidden="true">
+          <span>BUBBLE_FLOAT.EXE</span>
+          <span class="piti-game-window-buttons"><span>−</span><span>□</span><span>×</span></span>
+        </div>
+        <canvas id="bubble-canvas" width="800" height="300" tabindex="0" aria-label="Bubble Float game. Click bubbles to pop them."></canvas>
+        <div class="piti-game-controls">
+          <button id="bubble-button" type="button">START</button>
+          <span>Click bubbles as they float. No rush. No timer. Just breathe.</span>
+          <span class="piti-game-score">POPPED: <strong id="bubble-count">0</strong></span>
+        </div>
+        <p class="piti-game-status" id="bubble-status" role="status">Press start to play.</p>
+      </div>
     </section>
   </main>
   <script>
@@ -275,6 +309,7 @@
   const obstacles = [];
   const projectiles = [];
   const lightning = [];
+  const boosts = [];
   const movement = { left: false, right: false };
   let state = "ready";
   let score = 0;
@@ -285,6 +320,10 @@
   let runTime = 0;
   let boss = null;
   let bossDefeated = false;
+  let boostActive = false;
+  let boostTimer = 0;
+  let speedMultiplier = 1;
+  let nextBoost = 0;
 
   function draw() {
     context.clearRect(0, 0, canvas.width, canvas.height);
@@ -492,6 +531,20 @@
       context.fillRect(projectile.x + 4, ground - 12, 6, 2);
     });
 
+    boosts.forEach((boost) => {
+      const top = ground - boost.height;
+      context.fillStyle = "#d4a574";
+      context.fillRect(boost.x + 4, top + 4, 12, 24);
+      context.fillStyle = "#f4eddf";
+      context.fillRect(boost.x + 5, top + 6, 10, 10);
+      context.fillStyle = "#d9a98e";
+      context.fillRect(boost.x + 7, top + 8, 2, 6);
+      context.fillStyle = "#171717";
+      context.fillRect(boost.x + 3, top + 29, 14, 2);
+      context.fillRect(boost.x + 1, top + 25, 2, 6);
+      context.fillRect(boost.x + 16, top + 25, 2, 6);
+    });
+
     lightning.forEach((bolt) => {
       context.fillStyle = "#d9463b";
       if (bolt.delay > 0) {
@@ -531,7 +584,8 @@
     lastFrame = time;
     runTime += elapsed;
     const fastMode = selectedCharacter === "miri";
-    const speed = Math.min(430, 250 + runTime * 4) * (fastMode ? 1.65 * 1.7 : 1);
+    const baseSpeed = Math.min(430, 250 + runTime * 4) * (fastMode ? 1.65 * 1.7 : 1);
+    const speed = baseSpeed * speedMultiplier;
     const projectileSpeed = speed + (fastMode ? 150 * 1.7 : 150);
     player.x = Math.max(20, Math.min(canvas.width * 0.45, player.x +
       (Number(movement.right) - Number(movement.left)) * 220 * elapsed));
@@ -562,6 +616,20 @@
         });
         obstacleIndex++;
         nextObstacle = (type.spacing + Math.random() * 0.45) * (fastMode ? 0.65 : 1);
+      }
+    }
+
+    if (fastMode && !boss) {
+      nextBoost -= elapsed;
+      if (nextBoost <= 0) {
+        boosts.push({
+          label: "CERVEZA",
+          x: canvas.width,
+          width: 20,
+          height: 32,
+          passed: false
+        });
+        nextBoost = 5 + Math.random() * 2;
       }
     }
 
@@ -617,6 +685,32 @@
         return;
       }
     }
+    for (let i = boosts.length - 1; i >= 0; i--) {
+      const boost = boosts[i];
+      boost.x -= speed * elapsed;
+      if (boost.x < player.x + player.width - 4 &&
+          boost.x + boost.width + speed * elapsed > player.x + 4 &&
+          player.lift < boost.height - 4) {
+        boosts.splice(i, 1);
+        boostActive = true;
+        boostTimer = 3;
+        speedMultiplier = 0.5;
+        status.textContent = "SLOW MODE! Obstacles are slower for 3 seconds!";
+        continue;
+      }
+      if (!boost.passed && boost.x + boost.width < player.x) {
+        boost.passed = true;
+        boosts.splice(i, 1);
+      }
+    }
+    if (boostActive) {
+      boostTimer -= elapsed;
+      if (boostTimer <= 0) {
+        boostActive = false;
+        speedMultiplier = 1;
+        status.textContent = "SLOW MODE ended. Back to normal speed.";
+      }
+    }
     while (obstacles.length && obstacles[0].x + obstacles[0].width < 0) obstacles.shift();
     while (projectiles.length && projectiles[0].x + 14 < 0) projectiles.shift();
     while (lightning.length && lightning[0].remaining <= 0) lightning.shift();
@@ -638,6 +732,7 @@
       obstacles.length = 0;
       projectiles.length = 0;
       lightning.length = 0;
+      boosts.length = 0;
       clearMovement();
       player.x = 90;
       player.lift = 0;
@@ -647,8 +742,12 @@
       runTime = 0;
       boss = null;
       bossDefeated = false;
+      boostActive = false;
+      boostTimer = 0;
+      speedMultiplier = 1;
       scoreDisplay.textContent = "0";
       nextObstacle = 0.8;
+      nextBoost = 5;
     }
     if (state !== "playing") {
       state = "playing";
@@ -744,6 +843,293 @@
   visibilityObserver.observe(game);
 
   draw();
+}
+
+{
+  const clickGame = document.querySelector("#click-canvas");
+  const clickContext = clickGame.getContext("2d");
+  if (!clickContext) throw new Error("Unable to start the Click Escape game.");
+
+  const clickButton = document.querySelector("#click-button");
+  const clickClicksDisplay = document.querySelector("#click-chains");
+  const clickStatus = document.querySelector("#click-status");
+
+  const thoughts = [
+    "RENDER", "FLICKER", "EDGE", "COMP",
+    "LAYER", "MOTION", "KEYFRAME", "BAKE",
+    "CACHE", "EXPORT", "PREVIEW", "TWEAK",
+    "POLISH", "FRAME", "BLOOM", "GLOW",
+    "BLUR", "DISTORT", "REFINE", "OPTIMIZE",
+    "CODEC", "RESOLUTION", "ASPECT", "FEEDBACK",
+    "PRODUCTION", "DELIVERY", "COFFEE", "REVISIONS",
+    "BUGS", "DEADLINES", "STRESS", "MORE",
+    "AGAIN", "RUSH", "FIX", "RENDER", "RENDER", "RENDER"
+  ];
+
+  const words = [];
+  let clickState = "ready";
+  let clicksCount = 0;
+  let clickRunTime = 0;
+  let clickLastFrame = 0;
+  let clickFrame = 0;
+  let gameTime = 5;
+  let nextWordSpawn = 0;
+
+  function spawnWord() {
+    const word = thoughts[Math.floor(Math.random() * thoughts.length)];
+    const w = {
+      text: word,
+      x: Math.random() * (clickGame.width - 100) + 50,
+      y: Math.random() * (clickGame.height - 150) + 60,
+      lifetime: 2 + Math.random() * 1.5,
+      age: 0
+    };
+    words.push(w);
+  }
+
+  function drawWord(word) {
+    const opacity = 1 - (word.age / word.lifetime);
+    const size = Math.max(14, 24 - word.age * 5);
+    
+    clickContext.fillStyle = `rgba(217, 70, 59, ${opacity})`;
+    clickContext.font = `bold ${size}px monospace`;
+    clickContext.textAlign = "center";
+    clickContext.fillText(word.text, word.x, word.y);
+    clickContext.textAlign = "start";
+  }
+
+  function drawClick() {
+    clickContext.clearRect(0, 0, clickGame.width, clickGame.height);
+    clickContext.fillStyle = "#f4eddf";
+    clickContext.fillRect(0, 0, clickGame.width, clickGame.height);
+
+    clickContext.font = "bold 12px monospace";
+    clickContext.fillStyle = "#171717";
+    clickContext.fillText("CLICK ESCAPE / BREAK FREE", 20, 28);
+    clickContext.fillStyle = "#d9463b";
+    clickContext.font = "11px monospace";
+    clickContext.fillText("QUIET THE MIND", 20, 46);
+
+    if (clickState === "playing") {
+      clickContext.font = "bold 20px monospace";
+      clickContext.fillStyle = "#171717";
+      clickContext.textAlign = "right";
+      clickContext.fillText(Math.ceil(Math.max(0, gameTime - clickRunTime)), clickGame.width - 20, 28);
+      clickContext.textAlign = "start";
+    }
+
+    words.forEach(drawWord);
+  }
+
+  function endClickGame() {
+    clickState = "over";
+    clickButton.textContent = "PLAY AGAIN";
+    clickStatus.textContent = `SCORE: ${clicksCount} | LO HAS HECHO FATAL TIA`;
+    drawClick();
+  }
+
+  function updateClick(time) {
+    if (clickState !== "playing") return;
+    const elapsed = clickLastFrame ? Math.min((time - clickLastFrame) / 1000, 0.05) : 0;
+    clickLastFrame = time;
+    clickRunTime += elapsed;
+
+    nextWordSpawn -= elapsed;
+    if (nextWordSpawn <= 0) {
+      spawnWord();
+      nextWordSpawn = 0.4 + Math.random() * 0.3;
+    }
+
+    for (let i = words.length - 1; i >= 0; i--) {
+      words[i].age += elapsed;
+      if (words[i].age >= words[i].lifetime) {
+        words.splice(i, 1);
+      }
+    }
+
+    if (clickRunTime >= gameTime) {
+      endClickGame();
+      return;
+    }
+
+    drawClick();
+    clickFrame = requestAnimationFrame(updateClick);
+  }
+
+  function actClick() {
+    if (clickState === "ready" || clickState === "over") {
+      words.length = 0;
+      clicksCount = 0;
+      clickRunTime = 0;
+      clickLastFrame = 0;
+      nextWordSpawn = 0;
+      clickClicksDisplay.textContent = "0";
+      clickState = "playing";
+      clickButton.textContent = "PLAYING...";
+      clickStatus.textContent = "Click the thoughts to quiet your mind!";
+      drawClick();
+    }
+
+    if (clickState === "playing") {
+      clickFrame = requestAnimationFrame(updateClick);
+    }
+  }
+
+  clickGame.addEventListener("click", (event) => {
+    if (clickState !== "playing") return;
+
+    const rect = clickGame.getBoundingClientRect();
+    const clickX = (event.clientX - rect.left) * (clickGame.width / rect.width);
+    const clickY = (event.clientY - rect.top) * (clickGame.height / rect.height);
+
+    for (let i = words.length - 1; i >= 0; i--) {
+      const word = words[i];
+      const wordWidth = word.text.length * 7;
+      if (clickX > word.x - wordWidth / 2 && clickX < word.x + wordWidth / 2 &&
+          clickY > word.y - 15 && clickY < word.y + 5) {
+        words.splice(i, 1);
+        clicksCount++;
+        clickClicksDisplay.textContent = String(clicksCount);
+        break;
+      }
+    }
+    drawClick();
+  });
+
+  clickButton.addEventListener("click", actClick);
+  drawClick();
+}
+
+// BUBBLE FLOAT GAME
+{
+  const bubbleGame = document.querySelector("#bubble-canvas");
+  const bubbleContext = bubbleGame.getContext("2d");
+  if (!bubbleContext) throw new Error("Unable to start the Bubble Float game.");
+
+  const bubbleButton = bubbleGame.parentElement.parentElement.querySelector("button");
+  const bubbleCountDisplay = bubbleGame.parentElement.parentElement.querySelector("#bubble-count");
+  const bubbleStatus = bubbleGame.parentElement.parentElement.querySelector("#bubble-status");
+
+  const bubbles = [];
+  let bubbleState = "ready";
+  let bubblesPopped = 0;
+  let bubbleAnimationId = null;
+  let nextBubbleSpawn = 0;
+
+  function spawnBubble() {
+    const radius = 15 + Math.random() * 20;
+    bubbles.push({
+      x: Math.random() * (bubbleGame.width - radius * 2) + radius,
+      y: bubbleGame.height + radius,
+      radius: radius,
+      vx: (Math.random() - 0.5) * 1.5,
+      vy: -(0.2 + Math.random() * 0.5),
+      opacity: 1
+    });
+  }
+
+  function drawBubble() {
+    bubbleContext.fillStyle = "rgba(0, 0, 0, 1)";
+    bubbleContext.fillRect(0, 0, bubbleGame.width, bubbleGame.height);
+
+    for (let i = bubbles.length - 1; i >= 0; i--) {
+      const bubble = bubbles[i];
+      
+      bubble.x += bubble.vx;
+      bubble.y += bubble.vy;
+      bubble.opacity -= 0.001;
+
+      // Colisión con bordes del canvas
+      if (bubble.x - bubble.radius < 0 || bubble.x + bubble.radius > bubbleGame.width) {
+        bubble.vx *= -1;
+        bubble.x = Math.max(bubble.radius, Math.min(bubbleGame.width - bubble.radius, bubble.x));
+      }
+      if (bubble.y - bubble.radius < 0 || bubble.y + bubble.radius > bubbleGame.height) {
+        bubble.vy *= -1;
+        bubble.y = Math.max(bubble.radius, Math.min(bubbleGame.height - bubble.radius, bubble.y));
+      }
+
+      if (bubble.opacity <= 0) {
+        bubbles.splice(i, 1);
+        continue;
+      }
+
+      const alpha = Math.max(0, bubble.opacity);
+      bubbleContext.strokeStyle = `rgba(150, 150, 150, ${alpha * 0.6})`;
+      bubbleContext.lineWidth = 2;
+      bubbleContext.beginPath();
+      bubbleContext.arc(bubble.x, bubble.y, bubble.radius, 0, Math.PI * 2);
+      bubbleContext.stroke();
+
+      bubbleContext.fillStyle = `rgba(150, 150, 150, ${alpha * 0.15})`;
+      bubbleContext.beginPath();
+      bubbleContext.arc(bubble.x, bubble.y, bubble.radius, 0, Math.PI * 2);
+      bubbleContext.fill();
+    }
+  }
+
+  function updateBubble() {
+    if (bubbleState === "playing") {
+      nextBubbleSpawn--;
+      if (nextBubbleSpawn <= 0) {
+        spawnBubble();
+        nextBubbleSpawn = 30 + Math.random() * 50;
+      }
+    }
+    
+    drawBubble();
+    bubbleAnimationId = requestAnimationFrame(updateBubble);
+  }
+
+  function startBubble() {
+    bubbleState = "playing";
+    bubblesPopped = 0;
+    bubbles.length = 0;
+    bubbleCountDisplay.textContent = "0";
+    bubbleStatus.textContent = "Pop some bubbles. Breathe.";
+    bubbleButton.textContent = "RESET";
+    updateBubble();
+  }
+
+  bubbleGame.addEventListener("click", (event) => {
+    if (bubbleState !== "playing") return;
+
+    const rect = bubbleGame.getBoundingClientRect();
+    const clickX = (event.clientX - rect.left) * (bubbleGame.width / rect.width);
+    const clickY = (event.clientY - rect.top) * (bubbleGame.height / rect.height);
+
+    for (let i = bubbles.length - 1; i >= 0; i--) {
+      const bubble = bubbles[i];
+      const dist = Math.sqrt(
+        Math.pow(clickX - bubble.x, 2) + Math.pow(clickY - bubble.y, 2)
+      );
+      
+      if (dist < bubble.radius + 5) {
+        bubbles.splice(i, 1);
+        bubblesPopped++;
+        bubbleCountDisplay.textContent = String(bubblesPopped);
+        break;
+      }
+    }
+  });
+
+  bubbleButton.addEventListener("click", () => {
+    if (bubbleState === "ready") {
+      startBubble();
+    } else {
+      bubbleState = "ready";
+      bubbles.length = 0;
+      bubblesPopped = 0;
+      bubbleCountDisplay.textContent = "0";
+      bubbleStatus.textContent = "Press start to play.";
+      bubbleButton.textContent = "START";
+      cancelAnimationFrame(bubbleAnimationId);
+      bubbleContext.fillStyle = "rgba(0, 0, 0, 1)";
+      bubbleContext.fillRect(0, 0, bubbleGame.width, bubbleGame.height);
+    }
+  });
+
+  updateBubble();
 }
   </script>
 </body>
