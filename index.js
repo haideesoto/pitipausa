@@ -241,11 +241,11 @@
     canvas.focus();
     act();
   });
-  window.addEventListener("keydown", (event) => {
+  game.addEventListener("keydown", (event) => {
     if (event.code === "ArrowLeft" || event.code === "ArrowRight") {
       event.preventDefault();
       movement[event.code === "ArrowLeft" ? "left" : "right"] = true;
-    } else if ((event.code === "ArrowUp" || event.code === "Space") && !event.repeat) {
+    } else if ((event.code === "ArrowUp" || (event.code === "Space" && event.target === canvas)) && !event.repeat) {
       event.preventDefault();
       act();
     }
@@ -268,6 +268,16 @@
     });
     ["pointerup", "pointercancel", "lostpointercapture"].forEach((type) => {
       control.addEventListener(type, () => { movement[direction] = false; });
+    });
+    control.addEventListener("keydown", (event) => {
+      if (event.code !== "Space" && event.code !== "Enter") return;
+      event.preventDefault();
+      movement[direction] = true;
+    });
+    control.addEventListener("keyup", (event) => {
+      if (event.code !== "Space" && event.code !== "Enter") return;
+      event.preventDefault();
+      movement[direction] = false;
     });
   });
 
