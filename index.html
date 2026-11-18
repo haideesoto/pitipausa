@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Piti Pausa - Take a Break</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: #e9e5dd;
+      color: #171717;
+      font-family: "Courier New", monospace;
+    }
+
+    main {
+      width: min(100%, 1100px);
+      margin: 0 auto;
+      padding: clamp(32px, 6vw, 80px) clamp(20px, 5vw, 50px) 80px;
+    }
+
+    h1 {
+      margin: 0;
+      color: #d9463b;
+      font: 900 clamp(40px, 7vw, 72px)/0.98 Impact, "Arial Narrow", sans-serif;
+      letter-spacing: -0.035em;
+      overflow-wrap: anywhere;
+    }
+
+    .piti-game {
+      max-width: 1000px;
+      margin-top: clamp(32px, 4vw, 52px);
+      padding: clamp(6px, 1vw, 10px);
+      border: 2px solid #171717;
+      background: #d3cec5;
+      box-shadow: 7px 7px 0 #171717;
+    }
+
+    .piti-game-titlebar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-width: 0;
+      padding: 8px 10px;
+      background: #171717;
+      color: #f4eddf;
+      font: bold 12px/1 "Courier New", monospace;
+      letter-spacing: 0.06em;
+    }
+
+    .piti-game-window-buttons { display: flex; flex: none; gap: 4px; }
+
+    .piti-game-window-buttons span {
+      display: grid;
+      width: 18px;
+      height: 18px;
+      place-items: center;
+      border: 1px solid #f4eddf;
+      font-size: 13px;
+    }
+
+    .piti-game-window-buttons span:last-child { background: #d9463b; }
+
+    .piti-game canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      border: 2px solid #171717;
+      border-top: 0;
+      background: #f4eddf;
+      touch-action: manipulation;
+    }
+
+    .piti-game canvas:focus-visible,
+    .piti-game button:focus-visible {
+      outline: 2px solid #d9463b;
+      outline-offset: 4px;
+    }
+
+    .piti-game-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px 20px;
+      padding: 12px 4px 0;
+      font: 14px/1.5 "Courier New", monospace;
+    }
+
+    .piti-game button {
+      padding: 10px 18px;
+      border: 2px solid #171717;
+      background: #d9463b;
+      color: #f4eddf;
+      box-shadow: 3px 3px 0 #171717;
+      font: bold 14px/1.5 "Courier New", monospace;
+      cursor: pointer;
+    }
+
+    .piti-game button:hover { background: #171717; }
+    .piti-game button:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 #171717; }
+    .piti-game-movement { display: flex; gap: 8px; }
+
+    .piti-game-movement button {
+      min-width: 46px;
+      padding: 10px;
+      background: #171717;
+      touch-action: none;
+      user-select: none;
+    }
+
+    .piti-game-movement button:hover { background: #d9463b; }
+
+    .piti-game-score {
+      margin-left: auto;
+      padding: 5px 8px;
+      border: 1px solid #171717;
+      background: #f4eddf;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .piti-game-status { margin: 12px 4px 2px; font: 13px/1.4 "Courier New", monospace; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>PITI PAUSA - TAKE A BREAK</h1>
+    <div class="piti-game">
+      <div class="piti-game-titlebar" aria-hidden="true">
+        <span>PITI_PAUSA.EXE</span>
+        <span class="piti-game-window-buttons"><span>−</span><span>□</span><span>×</span></span>
+      </div>
+      <canvas width="800" height="260" tabindex="0" aria-label="Piti Pausa game. Use space or the up arrow to jump and the left and right arrows to move."></canvas>
+      <div class="piti-game-controls">
+        <button type="button">START</button>
+        <div class="piti-game-movement" aria-label="Movement controls">
+          <button type="button" data-direction="left" aria-label="Move left">←</button>
+          <button type="button" data-direction="right" aria-label="Move right">→</button>
+        </div>
+        <span>← → move / space, ↑ or tap to jump</span>
+        <span class="piti-game-score">SCORE: <strong>0</strong></span>
+      </div>
+      <p class="piti-game-status" role="status">Press start to play.</p>
+    </div>
+  </main>
+  <script>
+{
+  const game = document.querySelector(".piti-game");
+  const canvas = game.querySelector("canvas");
+  const context = canvas.getContext("2d");
+  if (!context) throw new Error("Unable to start the Piti Pausa game.");
+
+  const button = game.querySelector("button");
+  const scoreDisplay = game.querySelector(".piti-game-score strong");
+  const status = game.querySelector(".piti-game-status");
+  const ground = 210;
+  const player = { x: 90, width: 30, height: 40, lift: 0, velocity: 0 };
+  const obstacleTypes = [
+    { label: "PRODUCTION", width: 38, height: 40, message: "Production caught you." },
+    { label: "RENDER", width: 34, height: 34, message: "The render is still not finished." },
+    { label: "FEEDBACK", width: 38, height: 36, message: "Feedback: just one more change." }
+  ];
+  const obstacles = [];
+  const projectiles = [];
+  const movement = { left: false, right: false };
+  let state = "ready";
+  let score = 0;
+  let obstacleIndex = 0;
+  let nextObstacle = 0;
+  let lastFrame = 0;
+  let frame = 0;
+  let runTime = 0;
+
+  function draw() {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = "#f4eddf";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.strokeStyle = "#e3dcd0";
+    context.lineWidth = 1;
+    for (let x = 0; x < canvas.width; x += 40) {
+      context.beginPath();
+      context.moveTo(x + 0.5, 0);
+      context.lineTo(x + 0.5, ground);
+      context.stroke();
+    }
+    for (let y = 0; y < ground; y += 40) {
+      context.beginPath();
+      context.moveTo(0, y + 0.5);
+      context.lineTo(canvas.width, y + 0.5);
+      context.stroke();
+    }
+    context.font = "bold 12px monospace";
+    context.fillStyle = "#171717";
+    context.fillText("PITI PAUSA / TAKE A BREAK", 20, 28);
+    context.fillStyle = "#d9463b";
+    context.font = "11px monospace";
+    context.fillText("A BREAK... IF THEY LET YOU", 20, 46);
+    context.fillStyle = "#171717";
+    context.fillRect(560, 16, 215, 66);
+    context.fillStyle = "#f4eddf";
+    context.fillRect(562, 18, 211, 62);
+    context.fillStyle = "#d9463b";
+    context.fillRect(562, 18, 211, 17);
+    context.fillStyle = "#f4eddf";
+    context.font = "bold 9px monospace";
+    context.fillText("BREAK_STATUS.EXE", 569, 30);
+    context.fillStyle = "#171717";
+    context.font = "10px monospace";
+    context.fillText("LOOKING FOR A BREAK...", 570, 51);
+    context.strokeStyle = "#171717";
+    context.strokeRect(570.5, 59.5, 195, 11);
+    context.fillStyle = "#d9463b";
+    context.fillRect(573, 62, 190 * Math.min(runTime / 60, 1), 6);
+    context.fillStyle = "#d3cec5";
+    context.fillRect(0, ground + 2, canvas.width, canvas.height - ground - 2);
+    context.fillStyle = "#c8c0b5";
+    context.fillRect(0, ground + 8, canvas.width, 1);
+    context.fillStyle = "#171717";
+    context.fillRect(0, ground, canvas.width, 2);
+
+    const y = ground - player.height - player.lift;
+    const step = state === "playing" && player.lift === 0 && Math.floor(runTime * 8) % 2;
+    context.fillStyle = "#171717";
+    context.fillRect(player.x + 5, y, 19, 17);
+    context.fillRect(player.x + 3, y + 5, 5, 15);
+    context.fillRect(player.x + 20, y + 5, 5, 15);
+    context.fillStyle = "#d9a98e";
+    context.fillRect(player.x + 9, y + 6, 12, 10);
+    context.fillStyle = "#171717";
+    context.fillRect(player.x + 17, y + 9, 2, 2);
+    context.fillStyle = "#d9463b";
+    context.fillRect(player.x + 6, y + 18, 19, 14);
+    context.fillStyle = "#d9a98e";
+    context.fillRect(player.x + 23, y + 20, 5, 4);
+    context.fillStyle = "#171717";
+    context.fillRect(player.x + 27, y + 15, 2, 12);
+    context.fillRect(player.x + 7, y + 32, 7, step ? 5 : 8);
+    context.fillRect(player.x + 18, y + 32, 7, step ? 8 : 5);
+
+    obstacles.forEach((obstacle) => {
+      const top = ground - obstacle.height;
+      context.fillStyle = "#171717";
+      context.font = "bold 10px monospace";
+      context.textAlign = "center";
+      context.fillText(obstacle.label, obstacle.x + obstacle.width / 2, top - 8);
+      context.textAlign = "start";
+
+      if (obstacle.label !== "PRODUCTION") {
+        context.fillStyle = obstacle.label === "FEEDBACK" ? "#171717" : "#d9463b";
+        context.fillRect(obstacle.x, top, obstacle.width, obstacle.height);
+      }
+      context.fillStyle = "#f4eddf";
+      if (obstacle.label === "RENDER") {
+        context.fillRect(obstacle.x + 4, top + 5, 26, 17);
+        context.fillStyle = "#171717";
+        context.fillRect(obstacle.x + 7, top + 17, 18, 2);
+        context.fillStyle = "#d9463b";
+        context.fillRect(obstacle.x + 7, top + 17, 11, 2);
+        context.fillStyle = "#f4eddf";
+        context.fillRect(obstacle.x + 13, top + 25, 8, 5);
+      } else if (obstacle.label === "FEEDBACK") {
+        context.fillRect(obstacle.x + 5, top + 6, 28, 19);
+        context.fillRect(obstacle.x + 10, top + 25, 5, 4);
+        context.fillStyle = "#d9463b";
+        context.fillRect(obstacle.x + 9, top + 11, 20, 2);
+        context.fillRect(obstacle.x + 9, top + 16, 15, 2);
+        context.fillRect(obstacle.x + 9, top + 21, 18, 2);
+      } else {
+        context.fillStyle = "#171717";
+        context.fillRect(obstacle.x + 10, top, 18, 15);
+        context.fillStyle = "#d9a98e";
+        context.fillRect(obstacle.x + 12, top + 5, 12, 9);
+        context.fillStyle = "#171717";
+        context.fillRect(obstacle.x + 14, top + 8, 2, 2);
+        context.fillRect(obstacle.x + 8, top + 16, 22, 15);
+        context.fillRect(obstacle.x + 1, top + 20, 9, 4);
+        context.fillRect(obstacle.x + 10, top + 31, 7, 9);
+        context.fillRect(obstacle.x + 22, top + 31, 7, 9);
+        context.fillStyle = "#f4eddf";
+        context.fillRect(obstacle.x + 18, top + 17, 3, 10);
+      }
+    });
+
+    projectiles.forEach((projectile) => {
+      context.fillStyle = "#d9463b";
+      context.fillRect(projectile.x, ground - 14, 14, 10);
+      context.fillStyle = "#f4eddf";
+      context.fillRect(projectile.x + 4, ground - 12, 6, 2);
+    });
+  }
+
+  function clearMovement() {
+    movement.left = false;
+    movement.right = false;
+  }
+
+  function endGame(obstacle) {
+    state = "over";
+    clearMovement();
+    button.textContent = "PLAY AGAIN";
+    status.textContent = `${obstacle.message} Score: ${score}.`;
+    draw();
+  }
+
+  function update(time) {
+    if (state !== "playing") return;
+    const elapsed = lastFrame ? Math.min((time - lastFrame) / 1000, 0.05) : 0;
+    lastFrame = time;
+    runTime += elapsed;
+    const speed = Math.min(430, 250 + runTime * 4);
+    player.x = Math.max(20, Math.min(canvas.width * 0.45, player.x +
+      (Number(movement.right) - Number(movement.left)) * 220 * elapsed));
+    player.lift += player.velocity * elapsed;
+    player.velocity -= 1300 * elapsed;
+    if (player.lift <= 0) {
+      player.lift = 0;
+      player.velocity = 0;
+    }
+
+    nextObstacle -= elapsed;
+    if (nextObstacle <= 0) {
+      obstacles.push({ ...obstacleTypes[obstacleIndex % obstacleTypes.length], x: canvas.width, passed: false });
+      obstacleIndex++;
+      nextObstacle = 1.6 + Math.random() * 0.6;
+    }
+
+    for (const obstacle of obstacles) {
+      obstacle.x -= speed * elapsed;
+      if (obstacle.label === "PRODUCTION" && !obstacle.fired &&
+          obstacle.x <= player.x + 440 && obstacle.x > player.x + player.width) {
+        obstacle.fired = true;
+        projectiles.push({ x: obstacle.x - 14 });
+      }
+      if (!obstacle.passed && obstacle.x + obstacle.width < player.x) {
+        obstacle.passed = true;
+        scoreDisplay.textContent = String(++score);
+      }
+      if (obstacle.x < player.x + player.width - 4 &&
+          obstacle.x + obstacle.width > player.x + 4 &&
+          player.lift < obstacle.height - 4) {
+        endGame(obstacle);
+        return;
+      }
+    }
+    for (const projectile of projectiles) {
+      projectile.x -= (speed + 150) * elapsed;
+      if (projectile.x < player.x + player.width - 4 &&
+          projectile.x + 14 > player.x + 4 && player.lift < 14) {
+        endGame({ message: "Production got you with a shot." });
+        return;
+      }
+    }
+    while (obstacles.length && obstacles[0].x + obstacles[0].width < 0) obstacles.shift();
+    while (projectiles.length && projectiles[0].x + 14 < 0) projectiles.shift();
+    draw();
+    frame = requestAnimationFrame(update);
+  }
+
+  function act() {
+    if (state === "ready" || state === "over") {
+      obstacles.length = 0;
+      projectiles.length = 0;
+      clearMovement();
+      player.x = 90;
+      player.lift = 0;
+      player.velocity = 0;
+      score = 0;
+      obstacleIndex = 0;
+      runTime = 0;
+      scoreDisplay.textContent = "0";
+      nextObstacle = 0.8;
+    }
+    if (state !== "playing") {
+      state = "playing";
+      lastFrame = 0;
+      button.textContent = "JUMP";
+      status.textContent = "Game on. Jump over the obstacles.";
+      frame = requestAnimationFrame(update);
+      return;
+    }
+    if (player.lift === 0) player.velocity = 470;
+  }
+
+  button.addEventListener("click", act);
+  canvas.addEventListener("pointerdown", () => {
+    canvas.focus();
+    act();
+  });
+  game.addEventListener("keydown", (event) => {
+    if (event.code === "ArrowLeft" || event.code === "ArrowRight") {
+      event.preventDefault();
+      movement[event.code === "ArrowLeft" ? "left" : "right"] = true;
+    } else if ((event.code === "ArrowUp" || (event.code === "Space" && event.target === canvas)) && !event.repeat) {
+      event.preventDefault();
+      act();
+    }
+  });
+  window.addEventListener("keyup", (event) => {
+    if (event.code === "ArrowLeft") movement.left = false;
+    if (event.code === "ArrowRight") movement.right = false;
+  });
+  game.addEventListener("focusout", (event) => {
+    if (!game.contains(event.relatedTarget)) clearMovement();
+  });
+  window.addEventListener("blur", clearMovement);
+
+  game.querySelectorAll("[data-direction]").forEach((control) => {
+    const direction = control.dataset.direction;
+    control.addEventListener("pointerdown", (event) => {
+      event.preventDefault();
+      control.setPointerCapture(event.pointerId);
+      movement[direction] = true;
+    });
+    ["pointerup", "pointercancel", "lostpointercapture"].forEach((type) => {
+      control.addEventListener(type, () => { movement[direction] = false; });
+    });
+    control.addEventListener("keydown", (event) => {
+      if (event.code !== "Space" && event.code !== "Enter") return;
+      event.preventDefault();
+      movement[direction] = true;
+    });
+    control.addEventListener("keyup", (event) => {
+      if (event.code !== "Space" && event.code !== "Enter") return;
+      event.preventDefault();
+      movement[direction] = false;
+    });
+  });
+
+  function pause() {
+    if (state !== "playing") return;
+    state = "paused";
+    cancelAnimationFrame(frame);
+    clearMovement();
+    button.textContent = "CONTINUE";
+    status.textContent = "Game paused. Press continue to play.";
+  }
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) pause();
+  });
+  const visibilityObserver = new IntersectionObserver((entries) => {
+    if (!entries[0].isIntersecting) pause();
+  });
+  visibilityObserver.observe(game);
+
+  draw();
+}
+  </script>
+</body>
+</html>
