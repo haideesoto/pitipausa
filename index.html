@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Piti Pausa - Take a Break</title>
+  <title>Las cosas de mi aburrida vida encarcelada como Rapunzel</title>
   <style>
     * { box-sizing: border-box; }
 
@@ -28,9 +28,94 @@
       overflow-wrap: anywhere;
     }
 
+    .collection-header {
+      padding-bottom: 24px;
+      border-bottom: 2px solid #171717;
+    }
+
+    .collection-label {
+      margin: 0 0 16px;
+      font: bold 12px/1.4 "Courier New", monospace;
+      letter-spacing: 0.08em;
+    }
+
+    .game-section { margin-top: clamp(36px, 6vw, 64px); }
+
+    .game-heading {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px 20px;
+    }
+
+    .game-heading h2 {
+      margin: 0;
+      font: 900 clamp(30px, 5vw, 48px)/1 Impact, "Arial Narrow", sans-serif;
+      letter-spacing: -0.02em;
+    }
+
+    .game-heading span {
+      color: #d9463b;
+      font: bold 12px/1.4 "Courier New", monospace;
+      letter-spacing: 0.06em;
+    }
+
+    .coming-soon {
+      margin-top: 56px;
+      padding: clamp(24px, 4vw, 40px);
+      border: 2px dashed #171717;
+      background: #d3cec5;
+    }
+
+    .coming-soon p {
+      margin: 0 0 16px;
+      color: #d9463b;
+      font: bold 12px/1.4 "Courier New", monospace;
+      letter-spacing: 0.06em;
+    }
+
+    .coming-soon h2 {
+      margin: 0;
+      font: 900 clamp(30px, 5vw, 48px)/1 Impact, "Arial Narrow", sans-serif;
+      letter-spacing: -0.02em;
+    }
+
+    .character-picker {
+      margin: 32px 0 0;
+      padding: 0;
+      border: 0;
+    }
+
+    .character-picker legend {
+      margin-bottom: 10px;
+      font: bold 12px/1.4 "Courier New", monospace;
+      letter-spacing: 0.06em;
+    }
+
+    .character-picker select {
+      width: min(100%, 260px);
+      padding: 9px 12px;
+      border: 1px solid #171717;
+      border-radius: 0;
+      background: #171717;
+      color: #f4eddf;
+      box-shadow: 3px 3px 0 #d9463b;
+      font: bold 13px/1.4 "Courier New", monospace;
+      cursor: pointer;
+    }
+
+    .character-picker select:focus-visible {
+      outline: 2px solid #d9463b;
+      outline-offset: 4px;
+    }
+
+    .character-picker:disabled { opacity: 0.65; }
+    .character-picker:disabled select { cursor: default; }
+
     .piti-game {
       max-width: 1000px;
-      margin-top: clamp(32px, 4vw, 52px);
+      margin-top: 24px;
       padding: clamp(6px, 1vw, 10px);
       border: 2px solid #171717;
       background: #d3cec5;
@@ -125,24 +210,46 @@
 </head>
 <body>
   <main>
-    <h1>PITI PAUSA - TAKE A BREAK</h1>
-    <div class="piti-game">
-      <div class="piti-game-titlebar" aria-hidden="true">
-        <span>PITI_PAUSA.EXE</span>
-        <span class="piti-game-window-buttons"><span>−</span><span>□</span><span>×</span></span>
+    <header class="collection-header">
+      <p class="collection-label">UNA COLECCIÓN DE MINIJUEGOS / 001</p>
+      <h1>Las cosas de mi aburrida vida encarcelada como Rapunzel</h1>
+    </header>
+    <section class="game-section" aria-labelledby="piti-title" lang="en">
+      <div class="game-heading">
+        <h2 id="piti-title">PITI PAUSA - TAKE A BREAK</h2>
+        <span>01 / PLAY NOW</span>
       </div>
-      <canvas width="800" height="260" tabindex="0" aria-label="Piti Pausa game. Use space or the up arrow to jump and the left and right arrows to move."></canvas>
-      <div class="piti-game-controls">
-        <button type="button">START</button>
-        <div class="piti-game-movement" aria-label="Movement controls">
-          <button type="button" data-direction="left" aria-label="Move left">←</button>
-          <button type="button" data-direction="right" aria-label="Move right">→</button>
+      <fieldset class="character-picker">
+        <legend>WHO DO YOU FEEL LIKE TODAY?</legend>
+        <select name="character" aria-label="Choose your character">
+          <option value="artist">ARTIST</option>
+          <option value="isa">ISA</option>
+          <option value="yaiza">YAIZA</option>
+          <option value="miri">MIRI</option>
+        </select>
+      </fieldset>
+      <div class="piti-game">
+        <div class="piti-game-titlebar" aria-hidden="true">
+          <span>PITI_PAUSA.EXE</span>
+          <span class="piti-game-window-buttons"><span>−</span><span>□</span><span>×</span></span>
         </div>
-        <span>← → move / space, ↑ or tap to jump</span>
-        <span class="piti-game-score">SCORE: <strong>0</strong></span>
+        <canvas width="800" height="260" tabindex="0" aria-label="Piti Pausa game. Use space or the up arrow to jump and the left and right arrows to move."></canvas>
+        <div class="piti-game-controls">
+          <button type="button">START</button>
+          <div class="piti-game-movement" aria-label="Movement controls">
+            <button type="button" data-direction="left" aria-label="Move left">←</button>
+            <button type="button" data-direction="right" aria-label="Move right">→</button>
+          </div>
+          <span>← → move / space, ↑ or tap to jump / dodge DELIVERY's red mark</span>
+          <span class="piti-game-score">SCORE: <strong>0</strong></span>
+        </div>
+        <p class="piti-game-status" role="status">Press start to play.</p>
       </div>
-      <p class="piti-game-status" role="status">Press start to play.</p>
-    </div>
+    </section>
+    <section class="coming-soon" lang="en" aria-labelledby="coming-soon-title">
+      <p>02 / ???</p>
+      <h2 id="coming-soon-title">MORE TO COME....</h2>
+    </section>
   </main>
   <script>
 {
@@ -154,15 +261,20 @@
   const button = game.querySelector("button");
   const scoreDisplay = game.querySelector(".piti-game-score strong");
   const status = game.querySelector(".piti-game-status");
+  const characterPicker = document.querySelector(".character-picker");
+  let selectedCharacter = characterPicker.querySelector("select").value;
   const ground = 210;
   const player = { x: 90, width: 30, height: 40, lift: 0, velocity: 0 };
   const obstacleTypes = [
-    { label: "PRODUCTION", width: 38, height: 40, message: "Production caught you." },
-    { label: "RENDER", width: 34, height: 34, message: "The render is still not finished." },
-    { label: "FEEDBACK", width: 38, height: 36, message: "Feedback: just one more change." }
+    { label: "PRODUCTION", width: 38, height: 40, spacing: 2.2, message: "Production caught you." },
+    { label: "FEEDBACK", width: 38, height: 36, spacing: 1.8, message: "Feedback: just one more change." },
+    { label: "RENDER", width: 34, height: 34, spacing: 2.0, message: "The render is still not finished." },
+    { label: "DELIVERY", width: 38, height: 38, spacing: 2.8, message: "Delivery time is up." },
+    { label: "COFFEE", width: 32, height: 30, spacing: 1.7, message: "Coffee break interrupted." }
   ];
   const obstacles = [];
   const projectiles = [];
+  const lightning = [];
   const movement = { left: false, right: false };
   let state = "ready";
   let score = 0;
@@ -171,6 +283,8 @@
   let lastFrame = 0;
   let frame = 0;
   let runTime = 0;
+  let boss = null;
+  let bossDefeated = false;
 
   function draw() {
     context.clearRect(0, 0, canvas.width, canvas.height);
@@ -221,20 +335,69 @@
 
     const y = ground - player.height - player.lift;
     const step = state === "playing" && player.lift === 0 && Math.floor(runTime * 8) % 2;
-    context.fillStyle = "#171717";
+    if (selectedCharacter === "isa" || selectedCharacter === "miri") {
+      context.fillStyle = selectedCharacter === "miri" ? "#8b668a" : "#f4d99d";
+      context.fillRect(player.x + 2, y + 1, 26, 19);
+    }
+    context.fillStyle = selectedCharacter === "miri" ? "#704831" :
+      selectedCharacter === "yaiza" ? "#60412e" : "#171717";
     context.fillRect(player.x + 5, y, 19, 17);
     context.fillRect(player.x + 3, y + 5, 5, 15);
     context.fillRect(player.x + 20, y + 5, 5, 15);
+    if (selectedCharacter === "miri") {
+      context.fillRect(player.x + 2, y - 2, 7, 7);
+      context.fillRect(player.x + 9, y - 4, 7, 6);
+      context.fillRect(player.x + 16, y - 3, 7, 6);
+      context.fillRect(player.x + 22, y, 6, 8);
+      context.fillRect(player.x + 1, y + 7, 5, 7);
+      context.fillRect(player.x + 23, y + 9, 5, 7);
+    }
     context.fillStyle = "#d9a98e";
     context.fillRect(player.x + 9, y + 6, 12, 10);
     context.fillStyle = "#171717";
     context.fillRect(player.x + 17, y + 9, 2, 2);
-    context.fillStyle = "#d9463b";
+    context.fillStyle = selectedCharacter === "miri" ? "#8b668a" :
+      selectedCharacter === "isa" ? "#568389" :
+      selectedCharacter === "yaiza" ? "#d7ad72" : "#d9463b";
     context.fillRect(player.x + 6, y + 18, 19, 14);
+    if (selectedCharacter === "isa" || selectedCharacter === "miri") {
+      context.fillStyle = "#f4eddf";
+      context.fillRect(player.x + 10, y + 19, 2, 4);
+      context.fillRect(player.x + 19, y + 19, 2, 4);
+      context.fillStyle = selectedCharacter === "miri" ? "#644563" : "#c9a876";
+      context.fillRect(player.x + 10, y + 27, 11, 3);
+    } else if (selectedCharacter === "yaiza") {
+      context.fillStyle = "#60412e";
+      context.fillRect(player.x + 8, y + 20, 3, 3);
+      context.fillRect(player.x + 16, y + 19, 3, 2);
+      context.fillRect(player.x + 21, y + 23, 3, 3);
+      context.fillRect(player.x + 12, y + 26, 3, 3);
+      context.fillRect(player.x + 19, y + 29, 3, 2);
+    }
     context.fillStyle = "#d9a98e";
     context.fillRect(player.x + 23, y + 20, 5, 4);
     context.fillStyle = "#171717";
-    context.fillRect(player.x + 27, y + 15, 2, 12);
+    if (selectedCharacter === "yaiza") {
+      context.fillRect(player.x + 26, y + 16, 6, 8);
+      context.fillRect(player.x + 32, y + 18, 2, 4);
+      context.fillStyle = "#f4eddf";
+      context.fillRect(player.x + 27, y + 18, 4, 5);
+      context.fillStyle = "#171717";
+    } else if (selectedCharacter === "miri") {
+      context.fillRect(player.x + 27, y + 14, 3, 7);
+      context.fillRect(player.x + 34, y + 14, 3, 7);
+      context.fillRect(player.x + 26, y + 19, 12, 10);
+      context.fillStyle = "#e9c9ad";
+      context.fillRect(player.x + 28, y + 16, 1, 5);
+      context.fillRect(player.x + 35, y + 16, 1, 5);
+      context.fillRect(player.x + 28, y + 20, 8, 7);
+      context.fillStyle = "#171717";
+      context.fillRect(player.x + 29, y + 22, 1, 1);
+      context.fillRect(player.x + 34, y + 22, 1, 1);
+      context.fillRect(player.x + 30, y + 25, 4, 1);
+    } else {
+      context.fillRect(player.x + 27, y + 15, 2, 12);
+    }
     context.fillRect(player.x + 7, y + 32, 7, step ? 5 : 8);
     context.fillRect(player.x + 18, y + 32, 7, step ? 8 : 5);
 
@@ -246,7 +409,7 @@
       context.fillText(obstacle.label, obstacle.x + obstacle.width / 2, top - 8);
       context.textAlign = "start";
 
-      if (obstacle.label !== "PRODUCTION") {
+      if (obstacle.label !== "PRODUCTION" && obstacle.label !== "COFFEE") {
         context.fillStyle = obstacle.label === "FEEDBACK" ? "#171717" : "#d9463b";
         context.fillRect(obstacle.x, top, obstacle.width, obstacle.height);
       }
@@ -266,6 +429,23 @@
         context.fillRect(obstacle.x + 9, top + 11, 20, 2);
         context.fillRect(obstacle.x + 9, top + 16, 15, 2);
         context.fillRect(obstacle.x + 9, top + 21, 18, 2);
+      } else if (obstacle.label === "DELIVERY") {
+        const seconds = Math.ceil(obstacle.countdown);
+        context.fillRect(obstacle.x + 4, top + 5, 30, 28);
+        context.fillStyle = "#171717";
+        context.font = "bold 16px monospace";
+        context.textAlign = "center";
+        context.fillText(String(seconds), obstacle.x + obstacle.width / 2, top + 25);
+        context.textAlign = "start";
+      } else if (obstacle.label === "COFFEE") {
+        context.fillStyle = "#171717";
+        context.fillRect(obstacle.x + 3, top + 5, 22, 23);
+        context.fillRect(obstacle.x + 25, top + 9, 6, 13);
+        context.fillStyle = "#f4eddf";
+        context.fillRect(obstacle.x + 6, top + 8, 16, 17);
+        context.fillRect(obstacle.x + 25, top + 12, 3, 7);
+        context.fillStyle = "#d9463b";
+        context.fillRect(obstacle.x + 8, top + 9, 12, 3);
       } else {
         context.fillStyle = "#171717";
         context.fillRect(obstacle.x + 10, top, 18, 15);
@@ -282,11 +462,52 @@
       }
     });
 
+    if (boss) {
+      const x = 720;
+      const top = ground - 60;
+      context.fillStyle = "#d9463b";
+      context.font = "bold 12px monospace";
+      context.textAlign = "center";
+      context.fillText("CLIENT", x + 25, top - 19);
+      context.fillText(`${Math.ceil(boss.timeLeft)}s`, x + 25, top - 5);
+      context.textAlign = "start";
+      context.fillStyle = "#171717";
+      context.fillRect(x + 12, top, 26, 22);
+      context.fillStyle = "#d9a98e";
+      context.fillRect(x + 15, top + 6, 20, 13);
+      context.fillStyle = "#171717";
+      context.fillRect(x + 18, top + 10, 3, 3);
+      context.fillRect(x + 8, top + 22, 34, 24);
+      context.fillRect(x, top + 29, 12, 5);
+      context.fillRect(x + 11, top + 46, 10, 14);
+      context.fillRect(x + 29, top + 46, 10, 14);
+      context.fillStyle = "#d9463b";
+      context.fillRect(x + 24, top + 24, 4, 17);
+    }
+
     projectiles.forEach((projectile) => {
       context.fillStyle = "#d9463b";
       context.fillRect(projectile.x, ground - 14, 14, 10);
       context.fillStyle = "#f4eddf";
       context.fillRect(projectile.x + 4, ground - 12, 6, 2);
+    });
+
+    lightning.forEach((bolt) => {
+      context.fillStyle = "#d9463b";
+      if (bolt.delay > 0) {
+        context.fillRect(bolt.x - 15, ground - 5, 30, 5);
+        context.fillRect(bolt.x - 1, ground - 22, 2, 14);
+      } else {
+        context.beginPath();
+        context.moveTo(bolt.x + 10, 52);
+        context.lineTo(bolt.x - 13, 118);
+        context.lineTo(bolt.x + 2, 118);
+        context.lineTo(bolt.x - 12, ground);
+        context.lineTo(bolt.x + 16, 132);
+        context.lineTo(bolt.x + 1, 132);
+        context.closePath();
+        context.fill();
+      }
     });
   }
 
@@ -298,6 +519,7 @@
   function endGame(obstacle) {
     state = "over";
     clearMovement();
+    characterPicker.disabled = false;
     button.textContent = "PLAY AGAIN";
     status.textContent = `${obstacle.message} Score: ${score}.`;
     draw();
@@ -308,7 +530,9 @@
     const elapsed = lastFrame ? Math.min((time - lastFrame) / 1000, 0.05) : 0;
     lastFrame = time;
     runTime += elapsed;
-    const speed = Math.min(430, 250 + runTime * 4);
+    const fastMode = selectedCharacter === "miri";
+    const speed = Math.min(430, 250 + runTime * 4) * (fastMode ? 1.65 * 1.7 : 1);
+    const projectileSpeed = speed + (fastMode ? 150 * 1.7 : 150);
     player.x = Math.max(20, Math.min(canvas.width * 0.45, player.x +
       (Number(movement.right) - Number(movement.left)) * 220 * elapsed));
     player.lift += player.velocity * elapsed;
@@ -318,11 +542,27 @@
       player.velocity = 0;
     }
 
-    nextObstacle -= elapsed;
-    if (nextObstacle <= 0) {
-      obstacles.push({ ...obstacleTypes[obstacleIndex % obstacleTypes.length], x: canvas.width, passed: false });
-      obstacleIndex++;
-      nextObstacle = 1.6 + Math.random() * 0.6;
+    if (boss) {
+      boss.timeLeft = Math.max(0, boss.timeLeft - elapsed);
+      boss.nextShot -= elapsed;
+      if (boss.timeLeft > 0 && boss.nextShot <= 0) {
+        projectiles.push({ x: 706, message: "CLIENT caught you with an attack." });
+        boss.nextShot = fastMode ? 1 : 1.4;
+      }
+    } else {
+      nextObstacle -= elapsed;
+      if (nextObstacle <= 0) {
+        const type = obstacleTypes[obstacleIndex % obstacleTypes.length];
+        obstacles.push({
+          ...type,
+          x: canvas.width,
+          passed: false,
+          fired: false,
+          countdown: Math.max(fastMode ? 0.25 : 0.8, (canvas.width - player.x - 320) / speed)
+        });
+        obstacleIndex++;
+        nextObstacle = (type.spacing + Math.random() * 0.45) * (fastMode ? 0.65 : 1);
+      }
     }
 
     for (const obstacle of obstacles) {
@@ -330,29 +570,65 @@
       if (obstacle.label === "PRODUCTION" && !obstacle.fired &&
           obstacle.x <= player.x + 440 && obstacle.x > player.x + player.width) {
         obstacle.fired = true;
-        projectiles.push({ x: obstacle.x - 14 });
+        projectiles.push({ x: obstacle.x - 14, message: "Production caught you with a shot." });
       }
-      if (!obstacle.passed && obstacle.x + obstacle.width < player.x) {
-        obstacle.passed = true;
-        scoreDisplay.textContent = String(++score);
+      if (obstacle.label === "DELIVERY" && !obstacle.fired) {
+        obstacle.countdown = Math.max(0, obstacle.countdown - elapsed);
+        if (obstacle.countdown === 0) {
+          obstacle.fired = true;
+          lightning.push({ x: player.x + player.width / 2, delay: 0.65, remaining: 0.35 });
+          status.textContent = "DELIVERY: move away from the target!";
+        }
       }
       if (obstacle.x < player.x + player.width - 4 &&
-          obstacle.x + obstacle.width > player.x + 4 &&
+          obstacle.x + obstacle.width + speed * elapsed > player.x + 4 &&
           player.lift < obstacle.height - 4) {
         endGame(obstacle);
         return;
       }
+      if (!obstacle.passed && obstacle.x + obstacle.width < player.x) {
+        obstacle.passed = true;
+        scoreDisplay.textContent = String(++score);
+        if (score === 10 && !bossDefeated) {
+          obstacles.length = 0;
+          projectiles.length = 0;
+          lightning.length = 0;
+          boss = { timeLeft: 10, nextShot: fastMode ? 0.85 : 1.2 };
+          status.textContent = "CLIENT is here! Survive the attacks.";
+          break;
+        }
+      }
     }
     for (const projectile of projectiles) {
-      projectile.x -= (speed + 150) * elapsed;
+      projectile.x -= projectileSpeed * elapsed;
       if (projectile.x < player.x + player.width - 4 &&
-          projectile.x + 14 > player.x + 4 && player.lift < 14) {
-        endGame({ message: "Production got you with a shot." });
+          projectile.x + 14 + projectileSpeed * elapsed > player.x + 4 && player.lift < 14) {
+        endGame({ message: projectile.message });
+        return;
+      }
+    }
+    for (const bolt of lightning) {
+      bolt.delay = Math.max(0, bolt.delay - elapsed);
+      if (bolt.delay > 0) continue;
+      bolt.remaining -= elapsed;
+      if (bolt.remaining > 0 && bolt.x - 14 < player.x + player.width - 4 &&
+          bolt.x + 14 > player.x + 4) {
+        endGame({ message: "DELIVERY struck with lightning." });
         return;
       }
     }
     while (obstacles.length && obstacles[0].x + obstacles[0].width < 0) obstacles.shift();
     while (projectiles.length && projectiles[0].x + 14 < 0) projectiles.shift();
+    while (lightning.length && lightning[0].remaining <= 0) lightning.shift();
+    if (!boss && lightning.length === 0 && status.textContent.startsWith("DELIVERY:")) {
+      status.textContent = "Game on. Jump over the obstacles.";
+    }
+    if (boss && boss.timeLeft === 0 && projectiles.length === 0) {
+      boss = null;
+      bossDefeated = true;
+      nextObstacle = 1.2;
+      status.textContent = "CLIENT defeated! The break is getting closer.";
+    }
     draw();
     frame = requestAnimationFrame(update);
   }
@@ -361,6 +637,7 @@
     if (state === "ready" || state === "over") {
       obstacles.length = 0;
       projectiles.length = 0;
+      lightning.length = 0;
       clearMovement();
       player.x = 90;
       player.lift = 0;
@@ -368,14 +645,19 @@
       score = 0;
       obstacleIndex = 0;
       runTime = 0;
+      boss = null;
+      bossDefeated = false;
       scoreDisplay.textContent = "0";
       nextObstacle = 0.8;
     }
     if (state !== "playing") {
       state = "playing";
       lastFrame = 0;
+      characterPicker.disabled = true;
       button.textContent = "JUMP";
-      status.textContent = "Game on. Jump over the obstacles.";
+      status.textContent = boss ? "CLIENT is here! Survive the attacks." :
+        lightning.some((bolt) => bolt.delay > 0) ? "DELIVERY: move away from the target!" :
+        "Game on. Jump over the obstacles.";
       frame = requestAnimationFrame(update);
       return;
     }
@@ -383,17 +665,34 @@
   }
 
   button.addEventListener("click", act);
+  characterPicker.addEventListener("change", (event) => {
+    selectedCharacter = event.target.value;
+    draw();
+  });
   canvas.addEventListener("pointerdown", () => {
     canvas.focus();
     act();
   });
-  window.addEventListener("keydown", (event) => {
+  document.addEventListener("keydown", (event) => {
+    if (event.target.matches('select[name="character"]') &&
+        (event.code === "ArrowLeft" || event.code === "ArrowRight" ||
+         event.code === "ArrowUp" || event.code === "ArrowDown")) {
+      event.preventDefault();
+      const direction = event.code === "ArrowLeft" || event.code === "ArrowUp" ? -1 : 1;
+      const select = event.target;
+      const index = Math.max(0, Math.min(select.options.length - 1, select.selectedIndex + direction));
+      if (index !== select.selectedIndex) {
+        select.selectedIndex = index;
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+      return;
+    }
     if (event.code === "ArrowLeft" || event.code === "ArrowRight") {
       event.preventDefault();
       movement[event.code === "ArrowLeft" ? "left" : "right"] = true;
-    } else if ((event.code === "ArrowUp" || event.code === "Space") && !event.repeat) {
+    } else if (event.code === "ArrowUp" || event.code === "Space") {
       event.preventDefault();
-      act();
+      if (!event.repeat) act();
     }
   });
   window.addEventListener("keyup", (event) => {
@@ -414,6 +713,16 @@
     });
     ["pointerup", "pointercancel", "lostpointercapture"].forEach((type) => {
       control.addEventListener(type, () => { movement[direction] = false; });
+    });
+    control.addEventListener("keydown", (event) => {
+      if (event.code !== "Enter") return;
+      event.preventDefault();
+      movement[direction] = true;
+    });
+    control.addEventListener("keyup", (event) => {
+      if (event.code !== "Enter") return;
+      event.preventDefault();
+      movement[direction] = false;
     });
   });
 
